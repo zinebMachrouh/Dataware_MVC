@@ -1,7 +1,7 @@
 <?php
 
 class Core{
-    protected $currentController = 'Pages';
+    protected $currentController = 'Users';
     protected $currentMethod = 'index';
     protected $params = [];
 
@@ -9,12 +9,14 @@ class Core{
     {
         $url = $this->getUrl();
 
-        if (file_exists('../app/controllers/' . ucwords($url[0]) . '.php')) {
-            $this->currentController = ucwords($url[0]);
-            unset($url[0]);
+        if (isset($url) && is_array($url) && !empty($url)) {
+            if (file_exists('../app/controllers/'.ucwords($url[0]).'.php')) {
+                $this->currentController = ucwords($url[0]);
+                unset($url[0]);
+            }
         }
 
-        require '../app/controllers/' . $this->currentController . '.php';
+        require '../app/controllers/'.$this->currentController.'.php';
 
         $this->currentController = new $this->currentController;
 
