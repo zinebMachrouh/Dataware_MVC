@@ -9,7 +9,7 @@ class User
         $this->conn = new Database();
     }
 
-    function getData($email)
+    function getUser($email)
     {
         try {
             $query = "SELECT * FROM users WHERE email = :email";
@@ -79,7 +79,6 @@ class User
         }
 
         return false;
-
     }
 
     public function findUserByEmail($email)
@@ -94,5 +93,84 @@ class User
         } else {
             return false;
         }
+    }
+    public function updateUser($id, $fname, $lname, $birthdate, $service, $adress, $tel, $email, $pswd)
+    {
+        $pswd = base64_encode($pswd);
+
+        $this->conn->query("UPDATE users 
+                                    SET 
+                                        `lname` = :lname, 
+                                        `fname` = :fname, 
+                                        `birthdate` = :birthdate, 
+                                        `service` = :service, 
+                                        `adress` = :adress, 
+                                        `tel` = :tel, 
+                                        `email` = :email, 
+                                        `password` = :pswd 
+                                    WHERE `id` = :id");
+
+        $this->conn->bind(':lname', $lname);
+        $this->conn->bind(':fname', $fname);
+        $this->conn->bind(':birthdate', $birthdate);
+        $this->conn->bind(':service', $service);
+        $this->conn->bind(':adress', $adress);
+        $this->conn->bind(':tel', $tel);
+        $this->conn->bind(':email', $email);
+        $this->conn->bind(':pswd', $pswd);
+        $this->conn->bind(':id', $id);
+
+        $this->conn->execute();
+    }
+    //Members Dashboard Methods
+    public function getUserAndTeamInfoByEmail($email)
+    {
+        $query = "
+            SELECT
+                users.*,
+                team_user.team_id AS teamId,
+                teams.name AS team_name,
+                teams.description AS team_description
+            FROM
+                users
+            JOIN
+                team_user ON users.id = team_user.user_id
+            JOIN
+                teams ON team_user.team_id = teams.id
+            WHERE
+                users.email = :email
+        ";
+
+        $this->conn->query($query);
+        $this->conn->bind(':email', $email, PDO::PARAM_STR);
+        $this->conn->execute();
+        $user = $this->conn->single(PDO::FETCH_ASSOC);
+
+        return $user;
+    }
+
+    public function getUserTeamsById($userId)
+    {
+        $query = "SELECT team_id FROM team_user WHERE user_id = :userId";
+
+        $this->conn->query($query);
+        $this->conn->bind(':userId', $userId, PDO::PARAM_INT);
+        $this->conn->execute();
+
+        $userTeams = $this->conn->resultSet(PDO::FETCH_ASSOC);
+
+        return $userTeams;
+    }
+
+    //Admin Dashboard Methods
+    public function getUsersByAdmin($role)
+    {
+        $query = "SELECT * FROM users WHERE role != :role";
+
+        $this->conn->query($query);
+        $this->conn->bind(':role', $role, PDO::PARAM_INT);
+        $this->conn->execute();
+
+        return $this->conn->resultSet(PDO::FETCH_ASSOC);
     }
 }

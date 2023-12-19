@@ -1,11 +1,15 @@
 <?php
-
 class Users extends Controller
 {
-    private $userModel;
+    private $userModel;  
+    private $teamModel;  
+    private $projectModel; 
+
     public function __construct()
     {
         $this->userModel = $this->model('User');
+        $this->teamModel = $this->model('Team');
+        $this->projectModel = $this->model('Project');
     }
 
     public function index()
@@ -17,7 +21,6 @@ class Users extends Controller
     }
     public function signupPage()
     {
-
         $this->view('users/signup');
     }
     public function login()
@@ -36,6 +39,9 @@ class Users extends Controller
 
                 if ($loggedInUser) {
                     $this->createUserSession($loggedInUser);
+                    if($loggedInUser->role === 0){
+                        $this->memberDashboard($loggedInUser);
+                    }
                 } else {
                     echo '<script>alert("Incorrect Password")</script>';
 
@@ -67,7 +73,7 @@ class Users extends Controller
             ];
 
             $this->userModel->insertData($data['fname'], $data['lname'], $data['email'], $data['service'], $data['tel'], $data['password']);
-            $loggedInUser = $this->userModel->getData($data['email']);
+            $loggedInUser = $this->userModel->getUser($data['email']);
 
             $this->createUserSession($loggedInUser);
 
@@ -77,10 +83,6 @@ class Users extends Controller
     {
         $_SESSION['user_id'] = $user->id;
         $_SESSION['user_email'] = $user->email;
-        $data = [
-            'user' => $user
-        ];
-        $this->view('users/dashboard',$data);
     }
 
     public function logout()
@@ -92,4 +94,42 @@ class Users extends Controller
         redirect('users/index');
     }
 
+    public function memberDashboard($user){
+        $teamDetails = [];
+        $userAteam = $this->userModel->getUserAndTeamInfoByEmail($user->email);
+        $userTeams = $this->userModel->getUserTeamsById($userAteam->id);
+        foreach ($userTeams as $userTeam) {
+            array_push($teamDetails, $this->teamModel->getTeamDetailsById($userTeam->team_id));
+        }
+        $projects = $this->projectModel->getProjectsByUserId($user->id);
+        foreach ($projects as $project) {
+            $productOwner = $this->projectModel->getProductOwnerById($project->productOwner);
+        }
+
+        $data = [
+            'profile'=> $user,
+            'user'=> $userAteam,
+            'teamDetails'=> $teamDetails,
+            'projects'=> $projects,
+            'productOwner'=> $productOwner
+        ];
+
+        $this->view('users/dashboardMember', $data);
+    }
+    public function modifyUser()
+    {
+            $id = $_POST["id"];
+            $fname = $_POST["fname"];
+            $lname = $_POST["lname"];
+            $email = $_POST["email"];
+            $birthdate = $_POST["birthdate"];
+            $tel = $_POST["tel"];
+            $adress = $_POST["adress"];
+            $service = $_POST["service"];
+            $pswd = $_POST["pswd"];
+
+            $this->userModel->updateUser($id, $fname, $lname, $birthdate, $service, $adress, $tel, $email, $pswd);
+
+            $this->view('users/dashboardMember.php');
+    }
 }
