@@ -1,9 +1,9 @@
 <?php
 class Users extends Controller
 {
-    private $userModel;  
-    private $teamModel;  
-    private $projectModel; 
+    private $userModel;
+    private $teamModel;
+    private $projectModel;
 
     public function __construct()
     {
@@ -39,15 +39,12 @@ class Users extends Controller
 
                 if ($loggedInUser) {
                     $this->createUserSession($loggedInUser);
-                    if($loggedInUser->role === 0){
-                        $this->memberDashboard($loggedInUser);
-                    }
+                        $this->dashboard();
                 } else {
                     echo '<script>alert("Incorrect Password")</script>';
 
                     $this->view('users/index', $data);
                 }
-
             } else {
                 echo '<script>alert("No user found")</script>';
             }
@@ -60,7 +57,8 @@ class Users extends Controller
             $this->view('users/index', $data);
         }
     }
-    public function signup(){
+    public function signup()
+    {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
             $data = [
@@ -76,6 +74,7 @@ class Users extends Controller
             $loggedInUser = $this->userModel->getUser($data['email']);
 
             $this->createUserSession($loggedInUser);
+            $this->dashboard();
 
         }
     }
@@ -94,7 +93,8 @@ class Users extends Controller
         redirect('users/index');
     }
 
-    public function memberDashboard($user){
+    public function memberDashboard($user)
+    {
         $teamDetails = [];
         $userAteam = $this->userModel->getUserAndTeamInfoByEmail($user->email);
         $userTeams = $this->userModel->getUserTeamsById($userAteam->id);
@@ -107,29 +107,51 @@ class Users extends Controller
         }
 
         $data = [
-            'profile'=> $user,
-            'user'=> $userAteam,
-            'teamDetails'=> $teamDetails,
-            'projects'=> $projects,
-            'productOwner'=> $productOwner
+            'profile' => $user,
+            'user' => $userAteam,
+            'teamDetails' => $teamDetails,
+            'projects' => $projects,
+            'productOwner' => $productOwner
         ];
 
-        $this->view('users/dashboardMember', $data);
+        $this->view('users/dashboards/dashboardMember', $data);
     }
-    public function modifyUser()
+    public function modificationPage($id)
     {
-            $id = $_POST["id"];
-            $fname = $_POST["fname"];
-            $lname = $_POST["lname"];
-            $email = $_POST["email"];
-            $birthdate = $_POST["birthdate"];
-            $tel = $_POST["tel"];
-            $adress = $_POST["adress"];
-            $service = $_POST["service"];
-            $pswd = $_POST["pswd"];
+        $user = $this->userModel->getUserById($id);
+        $data = [
+            'user' => $user
+        ];
 
-            $this->userModel->updateUser($id, $fname, $lname, $birthdate, $service, $adress, $tel, $email, $pswd);
+        $this->view('users/modifyUser', $data);
+    }
+    public function modifyUser($id)
+    {
+        $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
 
-            $this->view('users/dashboardMember.php');
+        $fname = $_POST["fname"];
+        $lname = $_POST["lname"];
+        $email = $_POST["email"];
+        $birthdate = $_POST["birthdate"];
+        $tel = $_POST["tel"];
+        $adress = $_POST["adress"];
+        $service = $_POST["service"];
+        $pswd = $_POST["pswd"];
+
+        $this->userModel->updateUser($id, $fname, $lname, $birthdate, $service, $adress, $tel, $email, $pswd);
+
+        $this->dashboard();
+
+    }
+    public function dashboard()
+    {
+        $user = $this->userModel->getUserById($_SESSION['user_id']);
+        if ($user->role === 0) {
+            $this->memberDashboard($user);
+        }
+    }
+    public function deleteUser(){
+        $this->userModel->deleteUser($_SESSION['user_id']);
+        redirect('users/index');
     }
 }

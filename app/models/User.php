@@ -21,6 +21,18 @@ class User
             return null;
         }
     }
+    function getUserById($id)
+    {
+        try {
+            $query = "SELECT * FROM users WHERE id = :id";
+            $this->conn->query($query);
+            $this->conn->bind(':id', $id);
+            return $this->conn->single();
+        } catch (PDOException $e) {
+            echo '<script> alert("' . $e->getMessage() . '")</script>';
+            return null;
+        }
+    }
     public function insertData($fname, $lname, $email, $service, $tel, $password)
     {
         try {
@@ -121,6 +133,15 @@ class User
         $this->conn->bind(':id', $id);
 
         $this->conn->execute();
+    }
+
+    public function deleteUser($id){
+        $query = "DELETE FROM users WHERE id = :userId";
+        $this->conn->query($query);
+        $this->conn->bind(':userId', $id, PDO::PARAM_INT);
+        $this->conn->execute();
+        $_SESSION = array();
+        session_destroy();
     }
     //Members Dashboard Methods
     public function getUserAndTeamInfoByEmail($email)

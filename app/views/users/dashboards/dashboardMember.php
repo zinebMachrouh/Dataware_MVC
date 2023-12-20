@@ -62,8 +62,8 @@
                 echo "</p>";
                 ?>
                 <div class="popup-footer">
-                    <a href="#" style="background-color: #E33535;">Delete</a>
-                    <a href="#">Modify</a>
+                    <a href="<?php echo URLROOT; ?>/users/deleteUser" style="background-color: #E33535;">Delete</a>
+                    <a href="<?php echo URLROOT; ?>/users/modificationPage/<?php echo $data['profile']->id; ?>">Modify</a>
                 </div>
             </div>
         </div>
@@ -73,7 +73,6 @@
         <div class="hero">
             <?php
             echo '<h2 class=title>Hello ' . ucfirst($data['profile']->fname) . ' ' . ucfirst($data['profile']->lname) . '</h2>';
-
             if (empty($data['user'])) {
                 echo '<div class=fullPage><h4>No Teams <br>No Projects</h4></div>';
             } else {
