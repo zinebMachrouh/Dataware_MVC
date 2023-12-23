@@ -60,25 +60,20 @@
                 echo "</p>";
                 ?>
                 <div class="popup-footer">
-                    <a href="#" style="background-color: #E33535;">Delete</a>
-                    <a href="#">Modify</a>
+                    <a href="<?php echo URLROOT; ?>/users/deleteUser" style="background-color: #E33535;">Delete</a>
+                    <a href="<?php echo URLROOT; ?>/users/modificationPage/<?php echo $data['user']->id; ?>">Modify</a>
                 </div>
             </div>
         </div>
     </div>
     <main>
+        <a href=""></a>
         <div class="hero">
             <?php
             echo '<div class="add">
                     <h4 class=sub-title>All Projects : </h4>
-                    <a href="./addProject.php?productOwner=' . $user['id'] . '">+ New Project</a>
+                    <a href="' . URLROOT . '/projects/addProject">+ New Project</a>
                 </div>';
-
-            $query = "SELECT * from projects WHERE productOwner = :id";
-            $stmt = $conn->prepare($query);
-            $stmt->bindParam(':id', $user['id'], PDO::PARAM_STR);
-            $stmt->execute();
-            $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
             echo "<div class=fullPage><table class='teamTable'>
                         <tr>
                             <th>Project Name</th>
@@ -88,16 +83,16 @@
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>";
-            foreach ($projects as $project) {
+            foreach ($data['projects'] as $project) {
                 echo "
                         <tr>
-                            <td>{$project['name']}</td>
-                            <td>{$project['date_start']}</td>
-                            <td>{$project['date_end']}</td>
-                            <td>{$project['description']}</td>
+                            <td>{$project->name}</td>
+                            <td>{$project->date_start}</td>
+                            <td>{$project->date_end}</td>
+                            <td>{$project->description}</td>
                             <td>";
-                echo ($project['status'] === 0) ? '<p  class=active>● Active</p>' : '<p class=done>✔ Done</p></td>';
-                echo "<td class='actions'><a href='./modifyProject.php?projectId=" . $project['id'] . "'>Modify</a> <a href='./deleteProject.php?deleteOne=" . $project['id'] . "'>Delete</a></td>";
+                echo ($project->status === 0) ? '<p  class=active>● Active</p>' : '<p class=done>✔ Done</p></td>';
+                echo "<td><a href='" . URLROOT . "/projects/modifyPage/" . $project->id . "'>Modify</a> <a href='" . URLROOT . "/projects/deleteProject/" . $project->id . "'>Delete</a></td>";
             }
 
             echo "</table><h4 class=sub-title id=myTeams>Teams</h4> <div class='fullPage'>
@@ -109,37 +104,45 @@
                         <th>Project Name</th>
                         <th>Action</th>
                     </tr>";
-            $query1 = "SELECT teams.*
-                    FROM teams
-                    JOIN projects ON teams.projectId = projects.id
-                    JOIN users ON projects.productOwner = users.id
-                    WHERE teams.scrumMaster IS NULL
-                    AND users.id = :id";
-            $stmt1 = $conn->prepare($query1);
-            $stmt1->bindParam(':id', $user['id'], PDO::PARAM_INT);
-            $stmt1->execute();
-            $teams = $stmt1->fetchAll(PDO::FETCH_ASSOC);
-            foreach ($teams as $team) {
-                $query2 = "SELECT * from projects WHERE id = :id";
-                $stmt2 = $conn->prepare($query2);
-                $stmt2->bindParam(':id', $team['projectId'], PDO::PARAM_INT);
-
-                $stmt2->execute();
-                $teamP = $stmt2->fetch(PDO::FETCH_ASSOC);
-
+            foreach ($data['teams'] as $team) {
                 echo "
                         <tr>
-                            <td>{$team['name']}</td>
-                            <td>{$team['description']}</td>
-                            <td>{$team['created_at']}</td>
-                            <td>{$teamP['name']}</td>
-                            <td><a href=# onclick='openSMPopup(" . $team["id"] . ")'>Set Scrum Master</a></td>
+                            <td>{$team->name}</td>
+                            <td>{$team->description}</td>
+                            <td>{$team->created_at}</td>
+                            <td>{$team->projectName}</td>
+                            <td><a href=# onclick='openSMPopup(" . $team->id . ")'>Set Scrum Master</a></td>
                         </tr>";
             }
 
             ?>
         </div>
-
+        <div id="SMpopup" class="popup">
+            <div class="popup-content">
+                <div class="popup-header">
+                    <h2>Set Scrum Master</h2>
+                    <span class="close" onclick="closeSMPopup()">&times;</span>
+                </div>
+                <div class="popup-body">
+                    <form action="<?php echo URLROOT; ?>/projects/setScrumMaster" method="post">
+                        <label for="teamId" style="color: #008fd4; font-size: 16px; font-weight: 600;">Team ID:</label><br>
+                        <input type="number" id="teamId" name="teamId" required readonly style="width: 100%; padding: 10px 7px; font-size: 16px; border-radius: 5px; outline: none; border: #1e1e1e4c 1px solid; margin-bottom: 15px;"> <br>
+                        <label for="newSM" style="color: #008fd4; font-size: 16px; font-weight: 600;">New Scrum Master:</label><br>
+                        <select name="newSM" id="newSM" required style="width: 100%; padding: 10px 7px; font-size: 16px; border-radius: 5px; outline: none; border: #1e1e1e4c 1px solid; margin-bottom: 15px;">
+                            <option value="" hidden>Select Scrum Master</option>
+                            <?php
+                            foreach ($data['scrumMasters'] as $sm) {
+                                echo "<option value={$sm->id}>{$sm->fname} {$sm->lname}</option>";
+                            }
+                            ?>
+                        </select>
+                        <div class="popup-footer">
+                            <button type="submit" class="btn btn-primary" name="setSM">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </main>
 </body>
 

@@ -1,5 +1,6 @@
 <?php
 session_start();
+
 class User
 {
     private $conn;
@@ -135,7 +136,8 @@ class User
         $this->conn->execute();
     }
 
-    public function deleteUser($id){
+    public function deleteUser($id)
+    {
         $query = "DELETE FROM users WHERE id = :userId";
         $this->conn->query($query);
         $this->conn->bind(':userId', $id, PDO::PARAM_INT);
@@ -193,5 +195,19 @@ class User
         $this->conn->execute();
 
         return $this->conn->resultSet(PDO::FETCH_ASSOC);
+    }
+
+    public function updateRole($id, $newRole)
+    {
+        $this->conn->query("UPDATE users SET role = :newRole WHERE id = :userID");
+        $this->conn->bind(':newRole', $newRole);
+        $this->conn->bind(':userID', $id);
+        $this->conn->execute();
+    }
+
+    public function getScrumMasters(){
+        $this->conn->query("SELECT * FROM users WHERE role = 2");
+        $this->conn->execute();
+        return $this->conn->resultSet();
     }
 }

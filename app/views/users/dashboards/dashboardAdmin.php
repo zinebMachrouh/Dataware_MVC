@@ -6,11 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <link rel="shortcut icon" href="<?php echo URLROOT; ?>/assets/brand.png" type="image/x-icon">
-    <link rel="stylesheet" href="<?php echo URLROOT; ?>/css/style.css" type="text/css">
+    <!-- <link rel="stylesheet" href="<?php echo URLROOT; ?>/css/style.css" type="text/css"> -->
     <link rel="stylesheet" href="<?php echo URLROOT; ?>/css/dashboard.css" type="text/css">
     <script src="https://kit.fontawesome.com/6e1faf1eda.js" crossorigin="anonymous"></script>
     <script src="<?php echo URLROOT; ?>/js/script.js" defer></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
+
         main {
             margin-top: 9vh;
             /* background: url('../assets/bg.png') no-repeat; */
@@ -61,8 +63,8 @@
                 echo "</p>";
                 ?>
                 <div class="popup-footer">
-                    <a href="#" style="background-color: #E33535;">Delete</a>
-                    <a href="#">Modify</a>
+                    <a href="<?php echo URLROOT; ?>/users/deleteUser" style="background-color: #E33535;">Delete</a>
+                    <a href="<?php echo URLROOT; ?>/users/modificationPage/<?php echo $data['user']->id; ?>">Modify</a>
                 </div>
             </div>
         </div>
@@ -73,25 +75,19 @@
             echo '<h2 class=title>Hello ' . ucfirst($data['user']->fname) . ' ' . ucfirst($data['user']->lname) . '</h2>';
             echo '<h4 class=sub-title>All Users : </h4>';
             echo '<div class=cards>';
-
-            // $query = "SELECT * from users WHERE users.role != 3";
-
-            // $stmt = $conn->prepare($query);
-            // $stmt->execute();
-            // $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            foreach ($users as $user) {
+            foreach ($data['users'] as $user) {
                 echo "<div class=card>
                                 <div class=card-top>
-                                    <h4>" . substr($user['fname'], 0, 1) . "" . substr($user['lname'], 0, 1) . "</h4>
-                                    <h2>" . $user['fname'] . " " . $user['lname'] . "</h2>
+                                    <h4>" . substr($user->fname, 0, 1) . "" . substr($user->lname, 0, 1) . "</h4>
+                                    <h2>" . $user->fname . " " . $user->lname . "</h2>
                                 </div>
                                 <div class=card-body>
-                                    <p>" . $user['email'] . "</p>
-                                    <p>Tel: " . $user['tel'] . "</p>
+                                    <p>" . $user->email . "</p>
+                                    <p>Tel: " . $user->tel . "</p>
                                 </div>
                                 <div class=card-btm>
-                                    <a href=#><i class='fa-solid fa-location-dot' style='margin-right:5px;'></i>" . $user['service'] . "</a>";
-                echo ($user['role'] === 0) ? "<a onclick='openPopup(" . $user["id"] . ")'>Member <i class='fa-solid fa-pencil'></i></a>" : (($user['role'] === 1) ? "<a onclick='openPopup(" . $user["id"] . ")'>Product Owner <i class='fa-solid fa-pencil'></i></a>" : (($user['role'] === 2) ? "<a onclick='openPopup(" . $user["id"] . ")'>Scrum Master <i class='fa-solid fa-pencil'></i></a>" : ""));
+                                    <a href=#><i class='fa-solid fa-location-dot' style='margin-right:5px;'></i>" . $user->service . "</a>";
+                echo ($user->role === 0) ? "<a onclick='openPopup(" . $user->id . ")'>Member <i class='fa-solid fa-pencil'></i></a>" : (($user->role === 1) ? "<a onclick='openPopup(" . $user->id . ")'>Product Owner <i class='fa-solid fa-pencil'></i></a>" : (($user->role === 2) ? "<a onclick='openPopup(" . $user->id . ")'>Scrum Master <i class='fa-solid fa-pencil'></i></a>" : ""));
                 echo "</div>
                             </div>";
             }
@@ -99,7 +95,29 @@
 
             ?>
         </div>
-
+        <div id="popup" class="popup">
+            <div class="popup-content">
+                <div class="popup-header">
+                    <h2>Modify User Role</h2>
+                    <span class="close" onclick="closePopup()">&times;</span>
+                </div>
+                <div class="popup-body">
+                    <form action="<?php echo URLROOT; ?>/users/updateRole" method="post">
+                        <label for="userID">User ID:</label>
+                        <input type="text" id="userID" name="userID" id="userId" required readonly>
+                        <label for="newRole">New Role:</label>
+                        <select name="newRole" id="newRole" required>
+                            <option value="0">Member</option>
+                            <option value="1">Product Owner</option>
+                            <option value="2">Scrum Master</option>
+                        </select>
+                        <div class="popup-footer">
+                            <button type="submit" class="btn btn-primary">Modify Role</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </main>
 </body>
 

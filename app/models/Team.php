@@ -74,7 +74,7 @@ class Team
     //Product Owner Dashboard Members
     public function getTeamsWithoutScrumMasterByUserId($userId)
     {
-        $query = "SELECT teams.*
+        $query = "SELECT teams.* ,projects.name as projectName
                 FROM teams
                 JOIN projects ON teams.projectId = projects.id
                 JOIN users ON projects.productOwner = users.id

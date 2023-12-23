@@ -5,6 +5,7 @@ class Users extends Controller
     private $teamModel;
     private $projectModel;
 
+
     public function __construct()
     {
         $this->userModel = $this->model('User');
@@ -12,6 +13,10 @@ class Users extends Controller
         $this->projectModel = $this->model('Project');
     }
 
+    public function getProjectModel()
+    {
+        return $this->projectModel;
+    }
     public function index()
     {
         $data = [
@@ -19,10 +24,13 @@ class Users extends Controller
         ];
         $this->view('users/index', $data);
     }
+
+    //Authentication Methods
     public function signupPage()
     {
         $this->view('users/signup');
     }
+
     public function login()
     {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -39,7 +47,8 @@ class Users extends Controller
 
                 if ($loggedInUser) {
                     $this->createUserSession($loggedInUser);
-                        $this->dashboard();
+                    redirect('users/dashboard');
+
                 } else {
                     echo '<script>alert("Incorrect Password")</script>';
 
@@ -74,7 +83,7 @@ class Users extends Controller
             $loggedInUser = $this->userModel->getUser($data['email']);
 
             $this->createUserSession($loggedInUser);
-            $this->dashboard();
+            redirect('users/dashboard');
 
         }
     }
@@ -91,6 +100,19 @@ class Users extends Controller
         unset($_SESSION['user_name']);
         session_destroy();
         redirect('users/index');
+    }
+
+    //Dashboards Methods
+    public function dashboard()
+    {
+        $user = $this->userModel->getUserById($_SESSION['user_id']);
+        if ($user->role === 0) {
+            $this->memberDashboard($user);
+        } else if ($user->role === 3) {
+            $this->adminDashboard($user);
+        } else if ($user->role === 1) {
+            $this->productOwnerDashboard($user);
+        }
     }
 
     public function memberDashboard($user)
@@ -116,6 +138,32 @@ class Users extends Controller
 
         $this->view('users/dashboards/dashboardMember', $data);
     }
+
+    public function adminDashboard($user){
+        $users = $this->userModel->getUsersByAdmin($user->role);
+        $data = [
+            'user'=> $user,
+            'users' => $users
+        ];
+        $this->view('users/dashboards/dashboardAdmin', $data);
+    }
+
+    public function productOwnerDashboard($user){
+        $projects = $this->projectModel->getProjectsByProductOwnerId($user->id);
+        $teams = $this->teamModel->getTeamsWithoutScrumMasterByUserId($user->id);
+        $scrumMasters = $this->userModel->getScrumMasters();
+        $data = [
+            'user' => $user,
+            'projects' => $projects,
+            'teams'=>$teams,
+            'scrumMasters'=>$scrumMasters
+        ];
+        $this->view('users/dashboards/dashboardPO', $data);
+
+    }
+
+    //Update User Methods
+
     public function modificationPage($id)
     {
         $user = $this->userModel->getUserById($id);
@@ -140,18 +188,30 @@ class Users extends Controller
 
         $this->userModel->updateUser($id, $fname, $lname, $birthdate, $service, $adress, $tel, $email, $pswd);
 
-        $this->dashboard();
+        redirect('users/dashboard');
 
     }
-    public function dashboard()
-    {
-        $user = $this->userModel->getUserById($_SESSION['user_id']);
-        if ($user->role === 0) {
-            $this->memberDashboard($user);
-        }
-    }
+
+    //Delete User Method
+
     public function deleteUser(){
         $this->userModel->deleteUser($_SESSION['user_id']);
         redirect('users/index');
     }
+
+    //Admin Method
+
+    public function updateRole(){
+        $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+
+        $id = $_POST['userID'];
+        $newRole = $_POST['newRole'];
+
+        $this->userModel->updateRole($id, $newRole);
+        redirect('users/dashboard');
+
+    }
+
+    //Product Owner Methods
+
 }

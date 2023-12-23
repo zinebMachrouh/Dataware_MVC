@@ -9,6 +9,55 @@ class Project
     {
         $this->conn = new Database();
     }
+    public function insertData($name, $dateStart, $dateEnd, $status, $description, $productOwner)
+    {
+        $query = "INSERT INTO projects (name, date_start, date_end, description, status, productOwner) 
+            VALUES (:name, :date_start, :date_end, :description, :status, :productOwner)";
+
+        $this->conn->query($query);
+        $this->conn->bind(':name', $name);
+        $this->conn->bind(':date_start', $dateStart);
+        $this->conn->bind(':description', $description);
+        $this->conn->bind(':date_end', $dateEnd);
+        $this->conn->bind(':status', $status);
+        $this->conn->bind(':productOwner', $productOwner);
+
+        $this->conn->execute();
+    }
+
+    public function deleteOne($id)
+    {
+        $query = "DELETE from projects where id = :id";
+        $this->conn->query($query);
+        $this->conn->bind(':id', $id, PDO::PARAM_INT);
+        $this->conn->execute();
+    }
+
+    public function getProject($id)
+    {
+        $query = "SELECT * FROM projects WHERE id = :id";
+        $this->conn->query($query);
+        $this->conn->bind(':id', $id, PDO::PARAM_STR);
+        $this->conn->execute();
+        return $this->conn->single();
+    }
+
+    public function modifyData($id, $newData)
+    {
+
+        $query = "UPDATE projects SET name = :name, date_start = :date_start, date_end = :date_end, status = :status, description = :description WHERE id = :id";
+        $this->conn->query($query);
+
+        $this->conn->bind(':id', $id);
+        $this->conn->bind(':name', $newData['name']);
+        $this->conn->bind(':date_start', $newData['date_start']);
+        $this->conn->bind(':date_end', $newData['date_end']);
+        $this->conn->bind(':status', $newData['status']);
+        $this->conn->bind(':description', $newData['description']);
+
+        $this->conn->execute();
+    }
+
     //Member Dashboard Methods
 
     public function getProjectsByUserId($userId)
@@ -55,5 +104,13 @@ class Project
         $this->conn->execute();
 
         return $this->conn->single(PDO::FETCH_ASSOC);
+    }
+
+    public function setScrumMaster($teamId, $newSM)
+    {
+            $this->conn->query("UPDATE teams SET scrumMaster = :newSM WHERE id = :teamId");
+            $this->conn->bind(':teamId', $teamId, PDO::PARAM_INT);
+            $this->conn->bind(':newSM', $newSM, PDO::PARAM_INT);
+            $this->conn->execute();
     }
 }
