@@ -103,25 +103,6 @@
         //     header('Location: dashboard.php');
         //     exit();
         // }
-        // if (isset($_POST['setTeam'])) {
-        //     $name = $_POST['name'];
-        //     $description = $_POST['description'];
-        //     $projectId = $_POST['newP'];
-        //     $scrumMaster = $_POST['scrumMaster'];
-
-        //     $query = "INSERT INTO teams (name, description, projectId, scrumMaster) 
-        //     VALUES (:name, :description, :projectId, :scrumMaster)";
-
-        //     $stmt = $conn->prepare($query);
-        //     $stmt->bindParam(':name', $name);
-        //     $stmt->bindParam(':description', $description);
-        //     $stmt->bindParam(':projectId', $projectId);
-        //     $stmt->bindParam(':scrumMaster', $scrumMaster);
-
-        //     $stmt->execute();
-        //     header('Location: dashboard.php');
-        //     exit();
-        // }
 
         ?>
         <div class="hero">

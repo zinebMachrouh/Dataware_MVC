@@ -5,10 +5,12 @@ class Projects extends Controller
 {
     private $userController;
     private $projectModel;
+    private $userModel;
     public function __construct()
     {
         $this->userController = new Users();
         $this->projectModel = $this->userController->getProjectModel();
+        $this->userModel = $this->userController->getUserModel();
     }
 
     public function createProject()
@@ -71,6 +73,29 @@ class Projects extends Controller
 
         $this->projectModel->setScrumMaster($teamId, $newSM);
         redirect('users/dashboard');
+    }
+
+    public function projects()
+    {
+        $projects = $this->projectModel->getProjectsByProductOwner();
+        $productOwners = $this->userModel->getProductOwners();
+
+        $data = [
+            'projects' => $projects,
+            'productOwners' => $productOwners
+        ];
+        $this->view('projects/projects', $data);
+    }
+
+    public function updateProductOwner()
+    {
+        $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+
+        $projectId = $_POST['projectId'];
+        $productOwner = $_POST['productOwner'];
+
+        $this->projectModel->updateProductOwner($projectId, $productOwner);
+        redirect('projects/projects');
 
     }
 }

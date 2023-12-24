@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modify Project</title>
+    <title>Modify Team</title>
     <link rel="shortcut icon" href="<?php echo URLROOT; ?>/assets/brand.png" type="image/x-icon">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
@@ -147,34 +147,36 @@
     <div class="create-form">
         <h2>Data<img src="<?php echo URLROOT; ?>/assets/brand.png" alt=brand />are</h2>
 
-        <form action="<?php echo URLROOT; ?>/projects/updateProject/<?php echo $data['project']->id; ?>" method="post">
+        <form action="<?php echo URLROOT; ?>/teams/updateTeam/<?php echo $data['team']->id; ?>" method="post">
             <?php
             echo '
                     <label for="name">
-                        <h4>Project Name</h4>
-                        <input type="text" name="name" id="name" required placeholder="Enter Project Name" value=' . $data['project']->name . '>
+                        <h4>Team Name</h4>
+                        <input type="text" name="name" id="name" required placeholder="Enter Project Name" value=' . $data['team']->name . '>
                     </label>
-                    <label for="date_start">
-                        <h4>Start Date</h4>
-                        <input type="date" name="date_start" id="date_start" required value=' . $data['project']->date_start . '>
-                    </label>
-                    <label for="date_end">
-                        <h4>End Date</h4>
-                        <input type="date" name="date_end" id="date_end" required value=' . $data['project']->date_end . '>
-                    </label>
-                    <label for="status">
-                        <h4>Status</h4>
-                        <select name="status" id="status">
-                            <option value=' . $data['project']->status . ' selected hidden>Pick a status</option>
-                            <option value="0">Active</option>
-                            <option value="1">Done</option>
-                        </select>
+                    <label for="created_at">
+                        <h4>Created At</h4>
+                        <input type="date" name="created_at" id="created_at" required value=' . $data['team']->created_at . '>
                     </label>
                     <label for="description">
                         <h4>Description</h4>
-                        <input type="text" name="description" id="description" placeholder="lorem ipsum doleres" value=' . $data['project']->description . '>
+                        <input type="text" name="description" id="description" placeholder="lorem ipsum doleres" value=' . $data['team']->description . '>
                     </label>
-                    <div class="btns">
+                    <label for="projectId" >
+                        <h4>Project Name</h4>
+                        <select name="projectId" id="projectId" required>
+                            <option value="" hidden>Select Project</option>';
+            foreach ($data['projects'] as $proj) {
+                echo "<option value={$proj->id}>{$proj->name}</option>";
+            }
+
+            echo '</select>
+                    </label>
+                    <label>
+                        <h4>Scrum Master</h4>';
+            echo '
+            <input type="text" name="scrumMaster" id="scrumMaster" required placeholder="Scrum Master" value="' . $data['user']->fname . ' ' . $data['user']->lname . '" readonly>
+            <div class="btns">
                         <button type="reset">Cancel</button>
                         <button type="submit" name="sendF">Submit</button>
                     </div>

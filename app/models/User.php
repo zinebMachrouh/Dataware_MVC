@@ -205,9 +205,18 @@ class User
         $this->conn->execute();
     }
 
-    public function getScrumMasters(){
+    public function getScrumMasters()
+    {
         $this->conn->query("SELECT * FROM users WHERE role = 2");
         $this->conn->execute();
         return $this->conn->resultSet();
     }
+
+    public function getProductOwners()
+    {
+        $this->conn->query("SELECT * FROM users where role = 1");
+        $this->conn->execute();
+        return $this->conn->resultSet();
+    }
+
 }

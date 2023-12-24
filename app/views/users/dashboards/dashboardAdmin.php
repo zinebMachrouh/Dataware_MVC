@@ -31,7 +31,7 @@
         <h2>Data<img src="<?php echo URLROOT; ?>/assets/brand.png" alt=brand />are</h2>
         <nav>
             <a href="#"><i class="fa-solid fa-house"></i> Home</a>
-            <a href="./projects.php"><i class="fa-solid fa-bars-progress"></i>Projects</a>
+            <a href="<?php echo URLROOT; ?>/projects/projects"><i class="fa-solid fa-bars-progress"></i>Projects</a>
             <a href="#" onclick="openMyPopup()"><i class="fa-solid fa-user"></i> Profile</a>
             <a href="<?php echo URLROOT; ?>/users/logout"><i class="fa-solid fa-arrow-right-from-bracket"></i> LogOut</a>
         </nav>

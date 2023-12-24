@@ -58,6 +58,23 @@ class Project
         $this->conn->execute();
     }
 
+
+    public function getProjectsByProductOwner()
+    {
+        $query = "SELECT * FROM projects where productOwner IS NULL";
+        $this->conn->query($query);
+        $this->conn->execute();
+        return $this->conn->resultSet();
+    }
+
+    public function getProjectsNotInTeams()
+    {
+        $query = "SELECT * FROM projects WHERE NOT EXISTS ( SELECT * FROM teams WHERE teams.projectId = projects.id)";
+        $this->conn->query($query);
+        $this->conn->execute();
+
+        return $this->conn->resultSet(PDO::FETCH_ASSOC);
+    }
     //Member Dashboard Methods
 
     public function getProjectsByUserId($userId)
@@ -108,9 +125,17 @@ class Project
 
     public function setScrumMaster($teamId, $newSM)
     {
-            $this->conn->query("UPDATE teams SET scrumMaster = :newSM WHERE id = :teamId");
-            $this->conn->bind(':teamId', $teamId, PDO::PARAM_INT);
-            $this->conn->bind(':newSM', $newSM, PDO::PARAM_INT);
-            $this->conn->execute();
+        $this->conn->query("UPDATE teams SET scrumMaster = :newSM WHERE id = :teamId");
+        $this->conn->bind(':teamId', $teamId, PDO::PARAM_INT);
+        $this->conn->bind(':newSM', $newSM, PDO::PARAM_INT);
+        $this->conn->execute();
+    }
+
+    public function updateProductOwner($projectId, $productOwner)
+    {
+        $this->conn->query("UPDATE projects SET productOwner = :productOwner WHERE id = :projectId");
+        $this->conn->bind(':productOwner', $productOwner);
+        $this->conn->bind(':projectId', $projectId);
+        $this->conn->execute();
     }
 }

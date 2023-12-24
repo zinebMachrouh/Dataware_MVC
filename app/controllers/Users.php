@@ -17,6 +17,16 @@ class Users extends Controller
     {
         return $this->projectModel;
     }
+
+    public function getUserModel()
+    {
+        return $this->userModel;
+    }
+
+    public function getTeamModel()
+    {
+        return $this->teamModel;
+    }
     public function index()
     {
         $data = [
@@ -48,7 +58,6 @@ class Users extends Controller
                 if ($loggedInUser) {
                     $this->createUserSession($loggedInUser);
                     redirect('users/dashboard');
-
                 } else {
                     echo '<script>alert("Incorrect Password")</script>';
 
@@ -84,7 +93,6 @@ class Users extends Controller
 
             $this->createUserSession($loggedInUser);
             redirect('users/dashboard');
-
         }
     }
     public function createUserSession($user)
@@ -112,6 +120,8 @@ class Users extends Controller
             $this->adminDashboard($user);
         } else if ($user->role === 1) {
             $this->productOwnerDashboard($user);
+        } else if ($user->role === 2) {
+            $this->scrumMasterDashboard($user);
         }
     }
 
@@ -139,29 +149,41 @@ class Users extends Controller
         $this->view('users/dashboards/dashboardMember', $data);
     }
 
-    public function adminDashboard($user){
+    public function adminDashboard($user)
+    {
         $users = $this->userModel->getUsersByAdmin($user->role);
         $data = [
-            'user'=> $user,
+            'user' => $user,
             'users' => $users
         ];
         $this->view('users/dashboards/dashboardAdmin', $data);
     }
 
-    public function productOwnerDashboard($user){
+    public function productOwnerDashboard($user)
+    {
         $projects = $this->projectModel->getProjectsByProductOwnerId($user->id);
         $teams = $this->teamModel->getTeamsWithoutScrumMasterByUserId($user->id);
         $scrumMasters = $this->userModel->getScrumMasters();
         $data = [
             'user' => $user,
             'projects' => $projects,
-            'teams'=>$teams,
-            'scrumMasters'=>$scrumMasters
+            'teams' => $teams,
+            'scrumMasters' => $scrumMasters
         ];
         $this->view('users/dashboards/dashboardPO', $data);
-
     }
 
+    public function scrumMasterDashboard($user){
+        $teams = $this->teamModel->getTeamsByScrumMasterId($user->id);
+        $projects = $this->projectModel->getProjectsNotInTeams();
+        $data = [
+            'user' => $user,
+            'projects' => $projects,
+            'teams' => $teams,
+        ];
+        $this->view('users/dashboards/dashboardSM', $data);
+
+    }
     //Update User Methods
 
     public function modificationPage($id)
@@ -189,19 +211,20 @@ class Users extends Controller
         $this->userModel->updateUser($id, $fname, $lname, $birthdate, $service, $adress, $tel, $email, $pswd);
 
         redirect('users/dashboard');
-
     }
 
     //Delete User Method
 
-    public function deleteUser(){
+    public function deleteUser()
+    {
         $this->userModel->deleteUser($_SESSION['user_id']);
         redirect('users/index');
     }
 
     //Admin Method
 
-    public function updateRole(){
+    public function updateRole()
+    {
         $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
 
         $id = $_POST['userID'];
@@ -209,7 +232,6 @@ class Users extends Controller
 
         $this->userModel->updateRole($id, $newRole);
         redirect('users/dashboard');
-
     }
 
     //Product Owner Methods
